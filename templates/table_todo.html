@@ -14,15 +14,28 @@
                 <tr>
                     <th>Title</th>
                     <th>Description</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for todo in list_todo %}
-                <tr>
-                    <td>{{ todo.title }}</td>
-                    <td>{{ todo.description }}</td>
-                </tr>
-                {% endfor %}
+                {% if list_todo %}
+                    {% for todo in list_todo %}
+                    <tr>
+                        <td>{{ todo.title }}</td>
+                        <td>{{ todo.description }}</td>
+                        <td>
+                            <a href="/edit_todo/{{ todo.id }}" class="btn btn-primary btn-sm">Edit</a>
+                            <form action="/delete_todo_by_id/{{ todo.id }}" method="post" style="display: inline;">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="3" class="text-center">No tasks found</td>
+                    </tr>
+                {% endif %}
             </tbody>
         </table>
     </div>
