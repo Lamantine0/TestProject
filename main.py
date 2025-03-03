@@ -20,7 +20,7 @@ class Todo_list:
 
         await db_manager.create_tables()
         
-    # Методы для отрисовки html
+    # Метод для отрисовки html
     @app.get("/get_form", response_class=HTMLResponse) # теперь адрес выглядит так http://127.0.0.1:8000/get_form 
     async def read_form(request : Request):
 
@@ -101,35 +101,31 @@ class Todo_list:
 
             return RedirectResponse(url='/table_todo', status_code=303)
 
-    @app.get("/edit_todo/", response_class=HTMLResponse)
-    async def edit_todo_form(request: Request):
+    #Форма редактирования задачи
+    @app.get("/edit_todo/{id}", response_class=HTMLResponse)
+    async def edit_todo_form(request: Request, id : int):
 
+        return page.TemplateResponse("edit_todo.html", {"request": request, "id" : id})
 
-            return page.TemplateResponse("edit_todo.html", {"request": request})
-
-            
-    @app.post("/update_todo/{id}")
-    async def update_todo(request: Request,  id : int, title : str = Form()  , description: str = Form()):
+    #обновление todo        
+    @app.post("/edit_todo/{id}")
+    async def update_todo(request: Request,  id : int, title : str = Form(), description: str = Form()):
 
         async with db_manager.localsession()() as db:
 
-            update_query = await db.execute(select(ContextDB)
-                                            .where(ContextDB.id == id))
-                                        
+            update_query = await db.execute(update(ContextDB)
+                                            .where(ContextDB.id == id)
+                                            .values(title=title, description=description))
+
+
 
             if not update_query:
 
-                raise HTTPException(status_code=400, detail="Нет данных для обновления")
-            
-            await db.execute(
-            update(ContextDB)
-            .where(ContextDB.id == id)
-            .values(title=title, description=description)
-        ) 
+                raise HTTPException(status_code=400, detail="Нет данных для обновления")                    
 
             await db.commit()
 
-            return page.TemplateResponse("edit_todo.html", {"request": request, "todo": update_query})
+            return RedirectResponse(url='/table_todo', status_code=303)
 
 
             
